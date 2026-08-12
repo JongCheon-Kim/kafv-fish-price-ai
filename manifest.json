@@ -1,0 +1,24 @@
+{
+  "name": "KAFV 수산물 가격정보 AI",
+  "short_name": "수산가격AI",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#BACEE0",
+  "theme_color": "#FEE500",
+  "description": "aT 공공데이터 기반 KAFV 수산물 가격·추세·지역·경매 AI 챗봇",
+  "icons": [
+    {
+      "src": "kafv-fish-price-ai-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "kafv-fish-price-ai-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

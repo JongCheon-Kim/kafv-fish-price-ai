@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FEE500">
+<title>KAFV 수산물 가격정보 AI</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="kafv-fish-price-ai-icon-192.png">
+<style>
+:root{--yellow:#FEE500;--bg:#BACEE0;--text:#191919;--muted:#66737e;--line:#d7dee5;--white:#fff;--danger:#b42318}
+*{box-sizing:border-box} html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;color:var(--text);background:#eef2f5}
+button,input{font:inherit} button{cursor:pointer}
+.stage{min-height:100vh;display:grid;place-items:center;padding:16px}
+.phone{width:min(380px,100%);height:min(820px,calc(100vh - 32px));background:var(--bg);border-radius:44px;overflow:hidden;display:grid;grid-template-rows:auto 1fr auto auto;position:relative;border:1px solid rgba(0,0,0,.08);box-shadow:0 18px 55px rgba(22,40,54,.20)}
+.header{background:#fff;min-height:64px;display:flex;align-items:center;gap:9px;padding:10px 13px;border-bottom:1px solid var(--line);z-index:5}
+.logo{width:42px;height:42px;border-radius:13px;background:var(--yellow);display:grid;place-items:center;font-size:23px}
+.brand{flex:1;min-width:0}.title{font-weight:900;font-size:15px;white-space:nowrap}.sub{font-size:10.5px;color:var(--muted);margin-top:3px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#2fb344;margin-right:5px}
+.hbtn{width:32px;height:32px;border:0;border-radius:10px;background:#f4f6f8;font-weight:800}
+.chat{overflow:auto;padding:14px 12px 18px}.row{display:flex;margin:8px 0}.row.bot{justify-content:flex-start}.row.user{justify-content:flex-end}
+.bubble{max-width:87%;padding:10px 12px;border-radius:15px;font-size:13px;line-height:1.55;box-shadow:0 1px 1px rgba(0,0,0,.05)}.bot .bubble{background:#fff;border-top-left-radius:4px}.user .bubble{background:var(--yellow);border-top-right-radius:4px}
+.bubble h3{font-size:14px;margin:0 0 6px}.source{font-size:10.5px;color:#6b7782;margin-top:7px}.err{color:var(--danger)}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:rgba(255,255,255,.94);border-top:1px solid rgba(0,0,0,.06)}
+.quick button{border:0;background:#fff;border-radius:13px;min-height:55px;font-size:11px;font-weight:900;box-shadow:0 1px 4px rgba(0,0,0,.05)}.quick span{display:block;font-size:20px;margin-bottom:2px}
+.composer{display:flex;gap:7px;background:#fff;padding:9px 9px calc(9px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.composer input{flex:1;min-width:0;border:1px solid var(--line);border-radius:18px;padding:9px 12px}.send{width:38px;height:38px;border:0;border-radius:13px;background:var(--yellow);font-weight:900}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.32);display:none;align-items:flex-end;z-index:20}.sheet-bg.on{display:flex}
+.sheet{width:100%;max-height:86%;overflow:auto;background:#fff;border-radius:25px 25px 0 0;padding:14px 14px calc(18px + env(safe-area-inset-bottom))}
+.grab{width:42px;height:4px;background:#cbd2d8;border-radius:999px;margin:0 auto 11px}
+.sheet-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}.sheet-head h2{margin:0;font-size:16px;flex:1}.backx{border:0;background:#f2f4f6;width:31px;height:31px;border-radius:10px;font-size:16px}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.menu{border:1px solid #e1e6eb;background:#fff;border-radius:14px;padding:12px;text-align:left;min-height:80px}.menu strong{display:block;font-size:13px}.menu small{display:block;color:var(--muted);margin-top:4px;font-size:10.5px;line-height:1.35}
+.form{display:grid;gap:9px}.field label{display:block;font-size:11px;font-weight:800;color:#596571;margin-bottom:4px}.field input{width:100%;border:1px solid var(--line);border-radius:11px;padding:10px;background:#fff}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}.primary{width:100%;border:0;background:var(--yellow);border-radius:12px;padding:11px;font-weight:900}.hint{font-size:10.5px;color:var(--muted);background:#f6f8f9;padding:8px;border-radius:10px;line-height:1.45}
+.picker{position:relative}.pick-input{position:relative}.pick-input input{padding-right:38px;cursor:pointer;background:#fff}.pick-arrow{position:absolute;right:5px;top:5px;width:30px;height:31px;border:0;border-radius:8px;background:#f3f5f7}
+.pick-panel{display:none;position:absolute;left:0;right:0;top:100%;z-index:40;background:#fff;border:1px solid #d7dee5;border-radius:12px;box-shadow:0 12px 28px rgba(0,0,0,.15);margin-top:4px;padding:7px}.pick-panel.on{display:block}
+.pick-search{width:100%;border:1px solid #dde3e8;border-radius:9px;padding:8px;margin-bottom:6px}.pick-list{max-height:210px;overflow:auto;border-radius:8px}
+.pick-opt{width:100%;border:0;background:#fff;text-align:left;padding:9px 8px;border-bottom:1px solid #f0f2f4}.pick-opt:hover{background:#fff8c7}.pick-opt b{font-size:12px}.pick-opt small{float:right;color:#7a8792;font-size:10px}.pick-empty{padding:12px;color:#7a8792;font-size:11px}
+.result{border-top:1px solid #edf0f3;margin-top:7px;padding-top:7px}.kv{display:grid;grid-template-columns:82px 1fr;gap:3px 8px;font-size:12.5px}.kv b{color:#4f5b66}.price{font-size:21px;font-weight:900;margin:5px 0}
+.badge{display:inline-block;font-size:10px;font-weight:800;border-radius:999px;padding:3px 7px;background:#edf6ff;color:#245f91;margin-right:4px}.badge.warn{background:#fff2df;color:#955700}
+@media(max-width:520px){.stage{padding:0}.phone{width:100%;height:100vh;border-radius:0;border:0}}
+body.big .bubble{font-size:15px}
+</style>
+</head>
+<body>
+<div class="stage"><main class="phone">
+<header class="header">
+  <div class="logo">🐟</div>
+  <div class="brand"><div class="title">KAFV 수산물 가격정보 AI</div><div class="sub"><span class="dot"></span>aT 공공데이터 실시간 연계</div></div>
+  <button class="hbtn" id="fontBtn">가</button><button class="hbtn" id="settingsBtn">⚙</button>
+</header>
+<section class="chat" id="chat"></section>
+<nav class="quick">
+  <button data-group="price"><span>₩</span>가격</button>
+  <button data-group="trend"><span>📈</span>추세·등락</button>
+  <button data-group="region"><span>📍</span>지역·시장</button>
+  <button data-group="trade"><span>🔨</span>경매·거래</button>
+</nav>
+<form class="composer" id="composer"><input id="chatInput" placeholder="예: 고등어 최근가격"><button class="send">➤</button></form>
+<div class="sheet-bg" id="sheetBg"><section class="sheet" id="sheet"></section></div>
+</main></div>
+<script>
+const API_BASE="https://kafv-fish-price-api.123kjc.workers.dev";
+const chat=document.getElementById("chat"),sheetBg=document.getElementById("sheetBg"),sheet=document.getElementById("sheet");
+const nav={group:null,menu:null};
+const cache={fish:null,recentByItem:new Map(),region:new Map(),daily:new Map()};
+const FALLBACK_ITEMS=[{code:"611",name:"고등어"}];
+const SEASON={고등어:{season:"9월 ~ 다음 해 2월",note:"주 어기 외에는 수입산·냉동품 등 대체 공급을 함께 확인해야 합니다."}};
+
+function esc(v=""){return String(v).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+function fmt(v){if(v===null||v===undefined||v==="")return "-";const n=Number(String(v).replace(/,/g,""));return Number.isFinite(n)?n.toLocaleString("ko-KR"):esc(v)}
+function iso(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function d8(v){return String(v||iso()).replaceAll("-","")}
+function yesterday(){const d=new Date();d.setDate(d.getDate()-1);return iso(d)}
+function daysAgo(n){const d=new Date();d.setDate(d.getDate()-n);return iso(d)}
+function add(html,who="bot"){const r=document.createElement("div");r.className=`row ${who}`;r.innerHTML=`<div class="bubble">${html}</div>`;chat.appendChild(r);chat.scrollTop=chat.scrollHeight;return r}
+function normalize(raw){let x=raw; if(typeof x==="string"){try{x=JSON.parse(x)}catch{}} let b=x?.response?.body??x?.body??x; if(typeof b==="string"){try{b=JSON.parse(b)}catch{}} return b}
+function itemsOf(raw){const b=normalize(raw);let it=b?.items?.item??b?.item??b?.items??[];if(it&&!Array.isArray(it))it=[it];return {body:b,items:Array.isArray(it)?it:[]}}
+async function api(path,params={}){
+  const u=new URL(API_BASE+path);Object.entries(params).forEach(([k,v])=>{if(v!==""&&v!==null&&v!==undefined)u.searchParams.set(k,v)});
+  try{
+    const r=await fetch(u,{headers:{Accept:"application/json"}});
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    const t=await r.text();try{return JSON.parse(t)}catch{return t}
+  }catch(e){
+    if(String(e.message).includes("Failed to fetch")) throw new Error("브라우저에서 Cloudflare Worker 호출이 차단되었습니다. GitHub Pages 주소를 Cloudflare CORS 허용 Origin에 등록한 뒤 다시 조회하십시오.");
+    throw e;
+  }
+}
+function cond(o){const p={numOfRows:1000,pageNo:1,returnType:"json"};Object.entries(o).forEach(([k,v])=>{if(v!==""&&v!==null&&v!==undefined)p[`cond[${k}]`]=v});return p}
+function season(name){const s=SEASON[name];if(!s)return `<span class="badge">어기정보 미등록</span>`;const m=new Date().getMonth()+1,inS=m>=9||m<=2;return `<span class="badge ${inS?"":"warn"}">${inS?"주 어기":"주 어기 외"}</span><div class="source">주 어기: ${s.season} · ${s.note}</div>`}
+function err(e){add(`<h3>조회 오류</h3><div class="err">${esc(e.message||e)}</div><div class="source">API 오류와 정상적인 0건을 구분하여 처리합니다.</div>`)}
+function noData(msg="해당 조건의 자료가 없습니다."){add(`<h3>조회 결과</h3><span class="badge warn">0건</span><div class="result">${esc(msg)}<br><small>어기·휴어기·시장·품종 조건에 따라 0건은 정상 결과일 수 있습니다.</small></div>`)}
+
+function setSheet(html){sheet.innerHTML=`<div class="grab"></div>${html}`;sheetBg.classList.add("on")}
+function backX(){
+  document.querySelectorAll(".pick-panel.on").forEach(p=>p.classList.remove("on"));
+  if(nav.menu){const g=nav.group;nav.menu=null;openGroup(g);return}
+  nav.group=null;sheetBg.classList.remove("on");
+}
+sheetBg.onclick=e=>{if(e.target===sheetBg)backX()}
+
+async function fishOptions(){
+  if(cache.fish)return cache.fish;
+  try{
+    const raw=await api("/api/recent",cond({"ctgry_cd::EQ":"600"}));
+    const {items}=itemsOf(raw),m=new Map();
+    items.forEach(r=>{if(r.item_cd&&r.item_nm)m.set(String(r.item_cd),{code:String(r.item_cd),name:String(r.item_nm)})});
+    cache.fish=[...m.values()].sort((a,b)=>a.name.localeCompare(b.name,"ko"));
+    if(!cache.fish.length)cache.fish=FALLBACK_ITEMS;
+  }catch{cache.fish=FALLBACK_ITEMS}
+  return cache.fish;
+}
+async function recentRows(itemCode){
+  if(cache.recentByItem.has(itemCode))return cache.recentByItem.get(itemCode);
+  const {items}=itemsOf(await api("/api/recent",cond({"ctgry_cd::EQ":"600","item_cd::EQ":itemCode})));
+  cache.recentByItem.set(itemCode,items);return items
+}
+function uniq(rows,codeKey,nameKey){const m=new Map();rows.forEach(r=>{const c=String(r[codeKey]??"").trim(),n=String(r[nameKey]??"").trim();if(c&&n)m.set(c,{code:c,name:n})});return [...m.values()].sort((a,b)=>a.name.localeCompare(b.name,"ko"))}
+
+function picker(id,label,placeholder="선택하십시오"){return `<div class="field picker" id="${id}Wrap"><label>${label}</label><div class="pick-input">
+<input id="${id}" readonly placeholder="${placeholder}" data-code=""><button class="pick-arrow" type="button">▾</button></div>
+<div class="pick-panel"><input class="pick-search" placeholder="이름으로 검색"><div class="pick-list"><div class="pick-empty">목록을 불러오려면 이 필드를 누르십시오.</div></div></div></div>`}
+
+function wirePicker(id,loader,onSelect){
+  const w=document.getElementById(id+"Wrap"),inp=document.getElementById(id),panel=w.querySelector(".pick-panel"),list=w.querySelector(".pick-list"),search=w.querySelector(".pick-search");
+  let options=[];
+  const render=(q="")=>{
+    const qq=q.trim().toLowerCase(),arr=options.filter(o=>!qq||o.name.toLowerCase().includes(qq)||o.code.toLowerCase().includes(qq));
+    list.innerHTML=arr.length?arr.map((o,i)=>`<button type="button" class="pick-opt" data-i="${i}"><b>${esc(o.name)}</b><small>${esc(o.code)}</small></button>`).join(""):`<div class="pick-empty">해당 항목이 없습니다.</div>`;
+    list.querySelectorAll(".pick-opt").forEach((b,idx)=>b.onclick=()=>{const o=arr[idx];inp.value=o.name;inp.dataset.code=o.code;panel.classList.remove("on");if(onSelect)onSelect(o)});
+  };
+  const open=async()=>{
+    document.querySelectorAll(".pick-panel.on").forEach(p=>{if(p!==panel)p.classList.remove("on")});
+    panel.classList.add("on");list.innerHTML=`<div class="pick-empty">목록 불러오는 중...</div>`;
+    try{options=await loader();render(search.value)}catch(e){list.innerHTML=`<div class="pick-empty err">${esc(e.message||e)}</div>`}
+  };
+  w.querySelector(".pick-input").onclick=open;
+  w.querySelector(".pick-input").onmouseenter=()=>{if(window.matchMedia("(hover:hover)").matches)open()};
+  search.oninput=()=>render(search.value);
+}
+function getCode(id){return document.getElementById(id)?.dataset.code||""}
+function getVal(id){return document.getElementById(id)?.value?.trim()||""}
+function setPick(id,o){const x=document.getElementById(id);if(x&&o){x.value=o.name;x.dataset.code=o.code}}
+
+async function initCommonPickers(withSe=true,withVar=true,withGrade=true){
+  wirePicker("fItem",fishOptions,async o=>{
+    cache.recentByItem.delete(o.code);
+    if(document.getElementById("fVrty")){document.getElementById("fVrty").value="";document.getElementById("fVrty").dataset.code=""}
+    if(document.getElementById("fGrade")){document.getElementById("fGrade").value="";document.getElementById("fGrade").dataset.code=""}
+  });
+  setPick("fItem",{name:"고등어",code:"611"});
+  if(withSe){
+    wirePicker("fSe",async()=>[{code:"02",name:"중도매"},{code:"01",name:"소매"}]);
+    setPick("fSe",{code:"02",name:"중도매"});
+  }
+  if(withVar){
+    wirePicker("fVrty",async()=>{
+      const item=getCode("fItem")||"611",se=getCode("fSe");
+      let rows=await recentRows(item);if(se)rows=rows.filter(r=>String(r.se_cd)===se);
+      return uniq(rows,"vrty_cd","vrty_nm")
+    },()=>{if(document.getElementById("fGrade")){document.getElementById("fGrade").value="";document.getElementById("fGrade").dataset.code=""}});
+  }
+  if(withGrade){
+    wirePicker("fGrade",async()=>{
+      const item=getCode("fItem")||"611",se=getCode("fSe"),vr=getCode("fVrty");
+      let rows=await recentRows(item);if(se)rows=rows.filter(r=>String(r.se_cd)===se);if(vr)rows=rows.filter(r=>String(r.vrty_cd)===vr);
+      return uniq(rows,"grd_cd","grd_nm")
+    });
+  }
+}
+function commonFields({se=true,variety=true,grade=true}={}){
+  return `${picker("fItem","품목명","품목명을 선택하십시오")}
+  ${se?picker("fSe","유통단계","중도매/소매 선택"):""}
+  ${variety?picker("fVrty","품종/상태","예: 생선, 국산(냉장), 수입산(냉장)"):""}
+  ${grade?picker("fGrade","등급","예: 상품, 大"):""}`;
+}
+function head(title){return `<div class="sheet-head"><h2>${title}</h2><button class="backx" type="button" onclick="backX()">✕</button></div>`}
+
+const menus={
+ price:[["최근가격","최근 도·소매 가격과 과거 비교","recent"],["일별가격","날짜·지역·시장별 가격","daily"],["기간 중도매","기간별 도매시장 가격","pwh"],["기간 소매","기간별 소매시장 가격","prt"],["연월별 통계","월·연 평균/최고/최저","ym"]],
+ trend:[["1~4주 추이","현재와 1~4주 전 가격 비교","trend"],["등락정보","전일·전주·전월·전년 대비","change"],["연월별 통계","장기 월별 가격통계","ym"]],
+ region:[["지역별 가격","시군구별 평균·최저·최고","region"],["시장별 일별가격","시군구·시장별 상세가격","daily"]],
+ trade:[["실시간 경매","시장·법인·낙찰가·산지","auction"],["온라인 도매","온라인 거래 평균·최저·최고","online"]]
+};
+const groupName={price:"가격",trend:"추세·등락",region:"지역·시장",trade:"경매·거래"};
+
+function openGroup(g){nav.group=g;nav.menu=null;setSheet(`${head(groupName[g])}<div class="menu-grid">${menus[g].map(m=>`<button class="menu" data-menu="${m[2]}"><strong>${m[0]}</strong><small>${m[1]}</small></button>`).join("")}</div>`);sheet.querySelectorAll("[data-menu]").forEach(b=>b.onclick=()=>openMenu(b.dataset.menu))}
+document.querySelectorAll("[data-group]").forEach(b=>b.onclick=()=>openGroup(b.dataset.group));
+
+function openMenu(m){
+  nav.menu=m;
+  if(m==="recent"){setSheet(`${head("최근가격")}<div class="form">${commonFields()}<button class="primary" id="run">조회</button></div>`);initCommonPickers();document.getElementById("run").onclick=runRecent}
+  if(m==="trend"){setSheet(`${head("1~4주 가격추이")}<div class="form">${commonFields()}<button class="primary" id="run">조회</button></div>`);initCommonPickers();document.getElementById("run").onclick=runTrend}
+  if(m==="change"){setSheet(`${head("가격 등락정보")}<div class="form">${commonFields()}<button class="primary" id="run">조회</button></div>`);initCommonPickers();document.getElementById("run").onclick=runChange}
+  if(m==="region"){setSheet(`${head("지역별 가격")}<div class="form">${commonFields({se:false,variety:false,grade:false})}<div class="field"><label>기준일</label><input id="fDate" type="date" value="${yesterday()}"></div>${picker("fSgg","시군구","지역명을 선택하십시오")}<button class="primary" id="run">조회</button></div>`);initCommonPickers(false,false,false);wireRegionPicker();document.getElementById("run").onclick=runRegion}
+  if(m==="daily"){setSheet(`${head("시장별 일별가격")}<div class="form">${commonFields({se:false,variety:false,grade:false})}<div class="field"><label>기준일</label><input id="fDate" type="date" value="${yesterday()}"></div>${picker("fSgg","시군구","지역명을 선택하십시오")}${picker("fMarket","시장","시장명을 선택하십시오")}<button class="primary" id="run">조회</button></div>`);initCommonPickers(false,false,false);wireRegionPicker(true);document.getElementById("run").onclick=runDaily}
+  if(m==="pwh"||m==="prt"){setSheet(`${head(m==="pwh"?"기간별 중도매가격":"기간별 소매가격")}<div class="form">${commonFields({se:false,variety:false,grade:false})}<div class="cols"><div class="field"><label>시작일</label><input id="fStart" type="date" value="${daysAgo(10)}"></div><div class="field"><label>종료일</label><input id="fEnd" type="date" value="${yesterday()}"></div></div><button class="primary" id="run">조회</button></div>`);initCommonPickers(false,false,false);document.getElementById("run").onclick=m==="pwh"?runPwh:runPrt}
+  if(m==="ym"){setSheet(`${head("연월별 가격통계")}<div class="form">${commonFields({se:false,variety:false,grade:false})}<div class="cols"><div class="field"><label>시작월</label><input id="fStartYm" type="month" value="2026-02"></div><div class="field"><label>종료월</label><input id="fEndYm" type="month" value="2026-08"></div></div><button class="primary" id="run">조회</button></div>`);initCommonPickers(false,false,false);document.getElementById("run").onclick=runYm}
+  if(m==="auction"){setSheet(`${head("실시간 경매")}<div class="form"><div class="field"><label>거래 정산일</label><input id="fDate" type="date" value="${yesterday()}"></div>${picker("fKeyword","품목명","전체 또는 품목 선택")}<div class="hint">어기·휴어기에 따라 특정 어종의 경매자료가 없을 수 있습니다.</div><button class="primary" id="run">조회</button></div>`);wirePicker("fKeyword",fishOptions);document.getElementById("run").onclick=runAuction}
+  if(m==="online"){setSheet(`${head("온라인 도매시장")}<div class="form"><div class="hint">온라인 도매시장 거래자료를 조회합니다. 수산물 포함 여부는 실제 응답을 기준으로 판단합니다.</div><button class="primary" id="run">최근 거래자료 조회</button></div>`);document.getElementById("run").onclick=runOnline}
+}
+async function wireRegionPicker(withMarket=false){
+  wirePicker("fSgg",async()=>{
+    const item=getCode("fItem")||"611",date=d8(getVal("fDate"));
+    const key=item+"|"+date;
+    if(!cache.region.has(key)){const {items}=itemsOf(await api("/api/region",cond({"exmn_ymd::EQ":date,"ctgry_cd::EQ":"600","item_cd::EQ":item})));cache.region.set(key,items)}
+    return uniq(cache.region.get(key),"sgg_cd","sgg_nm")
+  },()=>{if(withMarket){const m=document.getElementById("fMarket");m.value="";m.dataset.code=""}});
+  if(withMarket)wirePicker("fMarket",async()=>{
+    const item=getCode("fItem")||"611",date=d8(getVal("fDate")),sgg=getCode("fSgg");
+    const key=item+"|"+date+"|"+sgg;
+    if(!cache.daily.has(key)){const {items}=itemsOf(await api("/api/daily",cond({"exmn_ymd::GTE":date,"exmn_ymd::LTE":date,"ctgry_cd::EQ":"600","item_cd::EQ":item,"sgg_cd::EQ":sgg})));cache.daily.set(key,items)}
+    return uniq(cache.daily.get(key),"mrkt_cd","mrkt_nm")
+  });
+}
+
+async function latestDate(item,se,vr,gr){
+  let rows=await recentRows(item);
+  if(se)rows=rows.filter(r=>String(r.se_cd)===se);if(vr)rows=rows.filter(r=>String(r.vrty_cd)===vr);if(gr)rows=rows.filter(r=>String(r.grd_cd)===gr);
+  return rows.map(r=>String(r.exmn_ymd||"")).filter(Boolean).sort().reverse()[0]||d8(yesterday())
+}
+async function runRecent(){
+  const item=getCode("fItem")||"611",name=getVal("fItem")||"고등어",se=getCode("fSe"),vr=getCode("fVrty"),gr=getCode("fGrade");backX();add(`${esc(name)} 최근가격을 조회합니다.`,"user");
+  try{const {items}=itemsOf(await api("/api/recent",cond({"ctgry_cd::EQ":"600","item_cd::EQ":item,"se_cd::EQ":se,"vrty_cd::EQ":vr,"grd_cd::EQ":gr})));if(!items.length)return noData();const r=items[0];add(`<h3>🐟 ${esc(r.item_nm||name)} 최근가격</h3>${season(r.item_nm||name)}<div class="price">${fmt(r.exmn_dd_prc)}원 / ${esc(r.unit_sz||"")}${esc(r.unit||"")}</div><div class="kv"><b>기준일</b><span>${esc(r.exmn_ymd||"-")}</span><b>유통단계</b><span>${esc(r.se_nm||"-")}</span><b>품종/상태</b><span>${esc(r.vrty_nm||"-")}</span><b>등급</b><span>${esc(r.grd_nm||"-")}</span><b>kg 환산</b><span>${fmt(r.exmn_dd_cnvs_prc)}원/kg</span><b>1주 전</b><span>${fmt(r.ww1_bfr_prc)}원</span><b>1개월 전</b><span>${fmt(r.mm1_bfr_prc)}원</span></div><div class="source">공식 API 원자료와 KAFV 어기 해석을 구분하여 표시합니다.</div>`)}catch(e){err(e)}
+}
+async function runTrend(){await runTrendChange("/api/trend","📈 가격추이",false)}
+async function runChange(){await runTrendChange("/api/change","↕ 가격 등락정보",true)}
+async function runTrendChange(path,title,isChange){
+  const item=getCode("fItem")||"611",name=getVal("fItem")||"고등어",se=getCode("fSe"),vr=getCode("fVrty"),gr=getCode("fGrade");const dt=await latestDate(item,se,vr,gr);backX();add(`${esc(name)} ${title.replace(/[📈↕]/g,"")}를 조회합니다.`,"user");
+  try{const {items}=itemsOf(await api(path,cond({"exmn_ymd::EQ":dt,"ctgry_cd::EQ":"600","item_cd::EQ":item,"se_cd::EQ":se,"vrty_cd::EQ":vr,"grd_cd::EQ":gr})));if(!items.length)return noData();const r=items[0];add(`<h3>${title}</h3><div class="kv">${isChange?`<b>현재 평균</b><span>${fmt(r.exmn_dd_avg_prc)}원</span><b>전일 대비</b><span>${fmt(r.dd1_bfr_cmpr_raftr)}%</span><b>1주 대비</b><span>${fmt(r.ww1_bfr_cmpr_raftr)}%</span><b>1개월 대비</b><span>${fmt(r.mm1_bfr_cmpr_raftr)}%</span><b>1년 대비</b><span>${fmt(r.yy1_bfr_cmpr_raftr)}%</span>`:`<b>현재</b><span>${fmt(r.exmn_dd_avg_prc)}원</span><b>1주 전</b><span>${fmt(r.ww1_bfr_avg_prc)}원</span><b>2주 전</b><span>${fmt(r.ww2_bfr_avg_prc)}원</span><b>3주 전</b><span>${fmt(r.ww3_bfr_avg_prc)}원</span><b>4주 전</b><span>${fmt(r.ww4_bfr_avg_prc)}원</span>`}</div><div class="source">기준일 ${dt}. 등락률의 방향은 이전 가격과 함께 해석합니다.</div>`)}catch(e){err(e)}
+}
+async function runRegion(){
+  const item=getCode("fItem")||"611",name=getVal("fItem")||"고등어",date=d8(getVal("fDate")),sgg=getCode("fSgg");backX();add(`${esc(name)} 지역별 가격을 조회합니다.`,"user");
+  try{const {items}=itemsOf(await api("/api/region",cond({"exmn_ymd::EQ":date,"ctgry_cd::EQ":"600","item_cd::EQ":item,"sgg_cd::EQ":sgg})));if(!items.length)return noData();add(`<h3>📍 ${esc(name)} 지역별 가격</h3>${items.slice(0,8).map(r=>`<div class="result"><b>${esc(r.sgg_nm||"-")} · ${esc(r.se_nm||"-")} · ${esc(r.vrty_nm||"-")}</b><div class="kv"><b>평균</b><span>${fmt(r.exmn_dd_avg_prc)}원</span><b>최저</b><span>${fmt(r.exmn_dd_min_prc)}원</span><b>최고</b><span>${fmt(r.exmn_dd_max_prc)}원</span></div></div>`).join("")}`)}catch(e){err(e)}
+}
+async function runDaily(){
+  const item=getCode("fItem")||"611",name=getVal("fItem")||"고등어",date=d8(getVal("fDate")),sgg=getCode("fSgg"),market=getCode("fMarket");backX();add(`${esc(name)} 시장별 일별가격을 조회합니다.`,"user");
+  try{const {items}=itemsOf(await api("/api/daily",cond({"exmn_ymd::GTE":date,"exmn_ymd::LTE":date,"ctgry_cd::EQ":"600","item_cd::EQ":item,"sgg_cd::EQ":sgg,"mrkt_cd::EQ":market})));if(!items.length)return noData();add(`<h3>🏪 ${esc(name)} 시장별 일별가격</h3>${items.slice(0,8).map(r=>`<div class="result"><b>${esc(r.sgg_nm||"")} ${esc(r.mrkt_nm||"")}</b><div class="kv"><b>품종</b><span>${esc(r.vrty_nm||"-")}</span><b>등급</b><span>${esc(r.grd_nm||"-")}</span><b>가격</b><span>${fmt(r.exmn_dd_prc)}원 / ${esc(r.unit_sz||"")}${esc(r.unit||"")}</span><b>kg환산</b><span>${fmt(r.exmn_dd_cnvs_prc)}원/kg</span></div></div>`).join("")}`)}catch(e){err(e)}
+}
+async function runPeriod(type){
+  const item=getCode("fItem")||"611",name=getVal("fItem")||"고등어",s=d8(getVal("fStart")),e=d8(getVal("fEnd"));backX();add(`${esc(name)} 기간별 ${type==="wholesale"?"중도매":"소매"}가격을 조회합니다.`,"user");
+  try{const {items}=itemsOf(await api(type==="wholesale"?"/api/wholesale":"/api/retail",cond({"exmn_ymd::GTE":s,"exmn_ymd::LTE":e,"ctgry_cd::EQ":"600","item_cd::EQ":item})));if(!items.length)return noData();add(`<h3>🗓 ${esc(name)} 기간별 ${type==="wholesale"?"중도매":"소매"}</h3>${items.slice(0,10).map(r=>`<div class="result"><b>${esc(r.exmn_ymd||"-")} · ${esc(r.sgg_nm||"")} ${esc(r.mrkt_nm||"")}</b><div class="kv"><b>품종</b><span>${esc(r.vrty_nm||"-")}</span><b>가격</b><span>${fmt(r.exmn_dd_prc)}원</span><b>kg환산</b><span>${fmt(r.exmn_dd_cnvs_prc)}원/kg</span></div></div>`).join("")}`)}catch(e){err(e)}
+}
+const runPwh=()=>runPeriod("wholesale"),runPrt=()=>runPeriod("retail");
+async function runYm(){
+  const item=getCode("fItem")||"611",name=getVal("fItem")||"고등어",s=getVal("fStartYm").replace("-",""),e=getVal("fEndYm").replace("-","");backX();add(`${esc(name)} 연월별 가격통계를 조회합니다.`,"user");
+  try{const {items}=itemsOf(await api("/api/yearmonth",cond({"exmn_ym::GTE":s,"exmn_ym::LTE":e,"ctgry_cd::EQ":"600","item_cd::EQ":item})));if(!items.length)return noData();add(`<h3>📊 ${esc(name)} 연월별 통계</h3>${items.slice(0,10).map(r=>`<div class="result"><b>${esc(r.exmn_ym||"-")} · ${esc(r.se_nm||"")} · ${esc(r.vrty_nm||"")}</b><div class="kv"><b>월평균</b><span>${fmt(r.pmm_avgprc)}원</span><b>월최고</b><span>${fmt(r.pmm_hgprc)}원</span><b>월최저</b><span>${fmt(r.pmm_lwprc)}원</span></div></div>`).join("")}`)}catch(e){err(e)}
+}
+async function runAuction(){
+  const date=getVal("fDate"),kw=getVal("fKeyword");backX();add(`${esc(date)} 경매자료를 조회합니다.`,"user");
+  try{const {items}=itemsOf(await api("/api/auction",cond({"trd_clcln_ymd::EQ":date})));let rows=items;if(kw)rows=rows.filter(r=>JSON.stringify(r).includes(kw));if(!rows.length)return noData(kw?`'${kw}' 경매자료가 없습니다.`:"해당 날짜의 경매자료가 없습니다.");add(`<h3>🔨 실시간 경매</h3>${rows.slice(0,8).map(r=>`<div class="result"><b>${esc(r.corp_gds_item_nm||r.gds_mclsf_nm||"-")} · ${esc(r.corp_gds_vrty_nm||"-")}</b><div class="kv"><b>시장</b><span>${esc(r.whsl_mrkt_nm||"-")}</span><b>법인</b><span>${esc(r.corp_nm||"-")}</span><b>낙찰가</b><span>${fmt(r.scsbdprc)}원</span><b>산지</b><span>${esc(r.plor_nm||"-")}</span></div></div>`).join("")}`)}catch(e){err(e)}
+}
+async function runOnline(){backX();add("온라인 도매시장 거래정보를 조회합니다.","user");try{const {items}=itemsOf(await api("/api/online",{numOfRows:100,pageNo:1,returnType:"json"}));if(!items.length)return noData();add(`<h3>🧾 온라인 도매시장</h3>${items.slice(0,8).map(r=>`<div class="result"><b>${esc(r.onln_whsl_mrkt_sclsf_nm||r.onln_whsl_mrkt_mclsf_nm||"-")}</b><div class="kv"><b>확정일</b><span>${esc(r.cfmn_ymd||"-")}</span><b>평균</b><span>${fmt(r.avgprc)}원</span><b>최저</b><span>${fmt(r.lwprc)}원</span><b>최고</b><span>${fmt(r.hgprc)}원</span></div></div>`).join("")}`)}catch(e){err(e)}}
+
+document.getElementById("composer").onsubmit=e=>{e.preventDefault();const x=document.getElementById("chatInput"),t=x.value.trim();if(!t)return;add(esc(t),"user");x.value="";if(t.includes("경매")){nav.group="trade";openMenu("auction")}else if(t.includes("지역")){nav.group="region";openMenu("region")}else if(t.includes("추이")){nav.group="trend";openMenu("trend")}else if(t.includes("등락")){nav.group="trend";openMenu("change")}else{nav.group="price";openMenu("recent")}}
+document.getElementById("fontBtn").onclick=()=>document.body.classList.toggle("big");
+document.getElementById("settingsBtn").onclick=()=>{nav.group=null;nav.menu=null;setSheet(`${head("설정·데이터 원칙")}<div class="hint">API Key는 GitHub/HTML에 저장하지 않고 Cloudflare Worker Secret에서 관리합니다.<br><br>코드값은 사용자가 직접 입력하지 않고 품목명·품종명·등급명·지역명·시장명 목록에서 선택하도록 설계했습니다.<br><br>현재 미리보기에서 ‘Failed to fetch’가 발생하면 Cloudflare CORS 허용 Origin 설정을 확인해야 합니다.</div>`)};
+
+add(`<h3>🐟 수산물 가격정보 AI</h3>품목·품종·등급·지역·시장은 <b>이름 목록에서 선택</b>하십시오. PC에서는 선택란에 마우스를 올리거나 클릭하고, 모바일에서는 탭한 뒤 목록을 스크롤해 선택할 수 있습니다.<div class="result">${season("고등어")}</div>`);
+</script>
+</body>
+</html>
